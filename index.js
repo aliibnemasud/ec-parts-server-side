@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const { get } = require('express/lib/response');
 const query = require('express/lib/middleware/query');
 
@@ -25,13 +25,23 @@ async function run() {
         await client.connect();        
         const toolsCollection = client.db('ecparts').collection('tools');
 
-        // Load tools
+        // Load all tools
         app.get('/tools', async (req, res)=>{            
             const query = {};
             const cursor = toolsCollection.find(query);
             const tools = await cursor.toArray();
             res.send(tools);           
         })
+
+        // Load dynamic route for tools
+        app.get('/tools/:id', async (req, res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await toolsCollection.findOne(query);
+            res.send(result)
+        })
+
+
     }
 
     finally{
