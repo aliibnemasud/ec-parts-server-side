@@ -25,6 +25,7 @@ async function run() {
         await client.connect();        
         const toolsCollection = client.db('ecparts').collection('tools');
         const ordersCollection = client.db('ecparts').collection('order');
+        const usersCollection = client.db('ecparts').collection('users');
 
         // Load all tools
         app.get('/tools', async (req, res)=>{            
@@ -57,9 +58,36 @@ async function run() {
             const orders = await cursor.toArray();
             res.send(orders);           
         })
-        // Delete Data      
 
+        // Delete Data
 
+        app.delete('/orders/:id', async (req, res)=>{ 
+            const id = req.params.id;           
+            const query = {_id: ObjectId(id)};
+            const result = await ordersCollection.deleteOne(query);            
+            res.send(result);           
+        })
+
+        // register user to the database
+        app.put('/users/:email', async (req, res)=>{
+            const email = req.params.email;
+            const user = req.body;
+            const filter = {email: email};
+            const option = {upsert: true};
+            const updateUser = {
+                $set: user,
+            };
+            const result = await usersCollection.updateOne(filter, updateUser, option);
+            res.send(result); 
+        })
+
+        // Load Users
+        app.get('/users', async (req, res)=>{            
+            const query = {};
+            const cursor = usersCollection.find(query);
+            const users = await cursor.toArray();
+            res.send(users);
+        })
     }
 
     finally {
