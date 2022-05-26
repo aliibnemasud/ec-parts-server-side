@@ -96,7 +96,24 @@ async function run() {
             const users = await cursor.toArray();
             res.send(users);
         })
+        
+        // Load single user
+        app.get('/users/:id', async (req, res)=>{
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await usersCollection.findOne(query);
+            res.send(result);
+        })
 
+
+        // Delete User
+
+        app.delete('/users/:id', async (req, res)=>{
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await usersCollection.deleteOne(query);
+            res.send(result);
+        })
 
         // Make Admin
         app.put('/user/admin/:email', async (req, res) => {
