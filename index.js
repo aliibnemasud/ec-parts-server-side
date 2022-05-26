@@ -45,24 +45,25 @@ async function run() {
         // Order api - working
         app.post('/orders', async(req, res)=>{
             const order = req.body;
-            const result = await orderCollection.insertOne(order);
+            const result = await ordersCollection.insertOne(order);
             res.send(result);                     
         })
         
-        // Load Orders
-
+        // Load Orders - individual
         app.get('/orders', async (req, res)=>{            
-            const query = {};
+            const email = req.query.email;
+            const query = {email: email };
             const cursor = ordersCollection.find(query);
             const orders = await cursor.toArray();
             res.send(orders);           
         })
+        // Delete Data      
 
 
     }
 
-    finally{
-
+    finally {
+        // close
     }    
 }
 
