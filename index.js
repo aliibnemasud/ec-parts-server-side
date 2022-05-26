@@ -148,9 +148,7 @@ async function run() {
             const review = req.body;            
             const result = await reviewsCollection.insertOne(review);                    
             res.send(result);
-        })
-
-        
+        })       
 
 
         // Last bracket of try
