@@ -26,6 +26,7 @@ async function run() {
         const toolsCollection = client.db('ecparts').collection('tools');
         const ordersCollection = client.db('ecparts').collection('order');
         const usersCollection = client.db('ecparts').collection('users');
+        const reviewsCollection = client.db('ecparts').collection('reviews');
 
         // Load all tools
         app.get('/tools', async (req, res) => {
@@ -97,7 +98,7 @@ async function run() {
             res.send(users);
         })
         
-        // Load single user
+        // Load single user by id
         app.get('/users/:id', async (req, res)=>{
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -105,6 +106,13 @@ async function run() {
             res.send(result);
         })
 
+        // Load single user by email
+        app.get('/users/:email', async (req, res)=>{
+            const email = req.email;
+            const query = {email:email};
+            const result = await usersCollection.findOne(query);
+            res.send(result);
+        })
 
         // Delete User
 
@@ -126,7 +134,23 @@ async function run() {
             res.send(result);
         })
 
-        // Add new product
+        // Load all review
+        app.get('/reviews', async (req, res) => {
+            const query = {};
+            const cursor = reviewsCollection.find(query);
+            const tools = await cursor.toArray();
+            res.send(tools);
+        })
+
+        // add new review
+
+        app.post('/review', async (req, res) => {
+            const review = req.body;            
+            const result = await reviewsCollection.insertOne(review);                    
+            res.send(result);
+        })
+
+        
 
 
         // Last bracket of try
