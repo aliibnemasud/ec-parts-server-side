@@ -5,6 +5,7 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const { get } = require('express/lib/response');
 const query = require('express/lib/middleware/query');
+const stripe = require('stripe')('sk_test_51L411VJBuTSfvsjA45Crzf9AKpslFvrncYZJTNjouLe3njh2o0YfQAlcMOyo4PeGPPqi9G8jDAvXrkbSJaHsRJFk00XSGFKky2');
 
 
 require('dotenv').config()
@@ -27,6 +28,7 @@ async function run() {
         const ordersCollection = client.db('ecparts').collection('order');
         const usersCollection = client.db('ecparts').collection('users');
         const reviewsCollection = client.db('ecparts').collection('reviews');
+        const paymentsCollection = client.db('ecparts').collection('payments');
 
         // Load all tools
         app.get('/tools', async (req, res) => {
@@ -75,6 +77,15 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await ordersCollection.deleteOne(query);
             res.send(result);
+        })
+        
+        // Load order by id
+        
+        app.get('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await ordersCollection.findOne(query);
+            res.send(result)
         })
 
         // register user to the database
@@ -134,6 +145,18 @@ async function run() {
             res.send(result);
         })
 
+        // find admin
+
+        app.get('/user/admin/:email', async(req, res)=>{
+            const email = req.params.email;
+            console.log(email)
+            const user = await usersCollection.findOne({email: email});
+            const isAdmin = user.role === 'admin';
+            res.send({admin: isAdmin});
+        })
+
+
+
         // Load all review
         app.get('/reviews', async (req, res) => {
             const query = {};
@@ -148,8 +171,47 @@ async function run() {
             const review = req.body;            
             const result = await reviewsCollection.insertOne(review);                    
             res.send(result);
-        })       
+        })
+        
+        // Payment by stripe integration
 
+        app.post('/create-payment-intent', async(req, res)=>{
+
+            const {toatlPrice} = req.body;
+            const amount = parseFloat(toatlPrice*100);            
+            
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ['card'],
+              });            
+
+            res.send({clientSecret: paymentIntent.client_secret})
+        });
+
+        // Payment post to the order
+
+        app.patch('/order/:id', async (req, res)=>{
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id)};
+            const payment = req.body;
+            
+            const updateDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,                     
+                },
+            };
+            const updatedOrder = await ordersCollection.updateOne(filter, updateDoc);
+            const payments = await paymentsCollection.insertOne(payment);
+
+            res.send(updateDoc)
+
+        } )
+
+        
+        
+       
 
         // Last bracket of try
     }
