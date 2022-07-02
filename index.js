@@ -154,7 +154,7 @@ async function run() {
 
         // Load Orders - individual - jwt
 
-        app.get('/orders', verifyJwt, async (req, res) => {
+        /* app.get('/orders', verifyJwt, async (req, res) => {
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
             if (email === decodedEmail) {
@@ -166,9 +166,9 @@ async function run() {
             else {
                 res.status(403).send({message: 'forbidden access'})
             }
-        })
+        }) */
 
-        // Load Orders - individual
+        // Load Orders - individual without jwt
 
         app.get('/orders', async (req, res) => {
                         
