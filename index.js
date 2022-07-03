@@ -54,7 +54,7 @@ const sendEmail = (order) => {
             console.log(err);
         }
         else {
-            console.log('Message sent: ' + info);
+            // console.log('Message Sent: ' + info);
         }
     });
 }
@@ -99,9 +99,7 @@ async function run() {
 
         // Load all tools
 
-        app.get('/tools', async (req, res) => {
-            const authHeader = req.headers.authorization;
-            console.log(authHeader)
+        app.get('/tools', async (req, res) => {                        
             const query = {};
             const cursor = toolsCollection.find(query);
             const tools = await cursor.toArray();
@@ -154,7 +152,7 @@ async function run() {
 
         // Load Orders - individual - jwt
 
-        /* app.get('/orders', verifyJwt, async (req, res) => {
+        app.get('/orders', verifyJwt, async (req, res) => {
             const decodedEmail = req.decoded.email;
             const email = req.query.email;
             if (email === decodedEmail) {
@@ -166,18 +164,18 @@ async function run() {
             else {
                 res.status(403).send({message: 'forbidden access'})
             }
-        }) */
+        })
 
         // Load Orders - individual without jwt
 
-        app.get('/orders', async (req, res) => {
+        /* app.get('/orders', async (req, res) => {
                         
                 const email = req.query.email;            
                 const query = { email: email };
                 const cursor = ordersCollection.find(query);
                 const orders = await cursor.toArray();
                 res.send(orders);            
-        })
+        }) */
         
 
         // Delete Order Data
@@ -263,8 +261,7 @@ async function run() {
         // find admin
 
         app.get('/user/admin/:email', async (req, res) => {
-            const email = req.params.email;
-            console.log(email)
+            const email = req.params.email;            
             const user = await usersCollection.findOne({ email: email });
             const isAdmin = user.role === 'admin';
             res.send({ admin: isAdmin });
@@ -357,14 +354,8 @@ async function run() {
             res.send(result)
         })
 
-
-
-
-
         // Last bracket of try
     }
-
-
 
     finally {
         // close
