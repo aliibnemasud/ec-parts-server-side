@@ -76,8 +76,7 @@ const verifyJwt = (req, res, next) => {
         }
         req.decoded = decoded;
         next();
-    });
-    
+    });    
 }
 
 
