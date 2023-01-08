@@ -79,8 +79,6 @@ const verifyJwt = (req, res, next) => {
     });    
 }
 
-
-
 //  Mogodb Connection
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@ecparts.fhkxc.mongodb.net/?retryWrites=true&w=majority`;
