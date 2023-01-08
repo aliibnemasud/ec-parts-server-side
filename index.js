@@ -76,7 +76,7 @@ const verifyJwt = (req, res, next) => {
         }
         req.decoded = decoded;
         next();
-    });    
+    });
 }
 
 //  Mogodb Connection
@@ -94,9 +94,13 @@ async function run() {
         const blogCollection = client.db('ecparts').collection('blogs');
         const paymentsCollection = client.db('ecparts').collection('payments');
 
+        // detictions server code
+        const secretKeyCollection = client.db('ecparts').collection('secrectkey');
+        const detectionsCollection = client.db('ecparts').collection('detections');
+
         // Load all tools
 
-        app.get('/tools', async (req, res) => {                        
+        app.get('/tools', async (req, res) => {
             const query = {};
             const cursor = toolsCollection.find(query);
             const tools = await cursor.toArray();
@@ -159,7 +163,7 @@ async function run() {
                 res.send(orders);
             }
             else {
-                res.status(403).send({message: 'forbidden access'})
+                res.status(403).send({ message: 'forbidden access' })
             }
         })
 
@@ -173,7 +177,7 @@ async function run() {
                 const orders = await cursor.toArray();
                 res.send(orders);            
         }) */
-        
+
 
         // Delete Order Data
 
@@ -258,7 +262,7 @@ async function run() {
         // find admin
 
         app.get('/user/admin/:email', async (req, res) => {
-            const email = req.params.email;            
+            const email = req.params.email;
             const user = await usersCollection.findOne({ email: email });
             const isAdmin = user.role === 'admin';
             res.send({ admin: isAdmin });
@@ -335,7 +339,7 @@ async function run() {
 
         // Load All Blog
 
-        app.get('/blogs', async (req, res) => {            
+        app.get('/blogs', async (req, res) => {
             const query = {};
             const cursor = blogCollection.find(query);
             const blogs = await cursor.toArray();
@@ -351,7 +355,49 @@ async function run() {
             res.send(result)
         })
 
+
+
+        // detections api making here
+
+        app.get('/secretKey', async (req, res) => {
+            try {
+                const secretKey = secretKeyCollection.find({});
+                const result = await secretKey.toArray();
+                res.send(result)
+
+            } catch (error) {
+                console.log(error)
+            }
+        })
+
+        app.post('/detections', async (req, res) => {
+            try {
+                const detectionsData = req.body;
+                const result = await detectionsCollection.insertOne(detectionsData);
+                res.send(result);
+            }
+            catch (error) {
+                console.log(error)
+            }
+        })
+
+
+        app.get('/detections', async (req, res) => {
+            try {
+                const result = await detectionsCollection.find({}).toArray();
+                res.send(result);
+            }
+            catch (error) {
+                console.log(error)
+            }
+        })
+
+        //// end
+
+
+
         // Last bracket of try
+
     }
 
     finally {
