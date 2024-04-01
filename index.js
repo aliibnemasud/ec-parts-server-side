@@ -4,71 +4,21 @@ const port = process.env.PORT || 5000;
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
-const stripe = require('stripe')('sk_test_51L411VJBuTSfvsjA45Crzf9AKpslFvrncYZJTNjouLe3njh2o0YfQAlcMOyo4PeGPPqi9G8jDAvXrkbSJaHsRJFk00XSGFKky2');
-
-
+const sendEmail = require('./src/shared/sendEmail');
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIP_SECRET_KEY);
 app.use(cors())
 app.use(express.json())
-
 app.get('/', (req, res) => {
     res.send("Manufacturer Website Server is Running...")
 })
 
-
-// Node Mailer
-
-const nodemailer = require('nodemailer');
-const sgTransport = require('nodemailer-sendgrid-transport');
-
-const options = {
-    auth: {
-        api_key: process.env.SEND_GRID_API
-    }
-}
-
-const sendGridClient = nodemailer.createTransport(sgTransport(options));
-
-const sendEmail = (order) => {
-
-    const { name, email, quantity, price, toatlPrice } = order;
-
-    const sentEmailThis = {
-        from: process.env.SENDER_EMAIL,
-        to: email,
-        subject: `${name} Order Placed Successfull`,
-        text: `${name} Order Placed Successfull`,
-        html: `
-        <div>
-        <h3>Thanks for your Order</h3>
-        <p>Product Name: ${name}</p> <br>
-        <p>Quantity: ${quantity}</p> <br>
-        <p>Product Name: ${price}</p> <br>
-        <p>Total Price: ${toatlPrice}</p>        
-        </div>
-        `
-    };
-
-    sendGridClient.sendMail(sentEmailThis, function (err, info) {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            // console.log('Message Sent: ' + info);
-        }
-    });
-}
-
 // Verify JWT Token
-
 const verifyJwt = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-        return res.status(401).send({ message: "unauthorized access" })
-    }
-
+        return res.status(401).send({ message: "unauthorized access" })    }
     const token = authHeader.split(' ')[1];
-
     jwt.verify(token, process.env.JSON_WEB_TOKEN, function (err, decoded) {
         if (err) {
             console.log(err)
@@ -289,8 +239,8 @@ async function run() {
 
         app.post('/create-payment-intent', async (req, res) => {
 
-            const { toatlPrice } = req.body;
-            const amount = parseFloat(toatlPrice * 100);
+            const { totalPrice } = req.body;
+            const amount = parseFloat(totalPrice * 100);
 
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
