@@ -10,7 +10,6 @@ const options = {
 const sendGridClient = nodemailer.createTransport(sgTransport(options));
 const sendEmail = (order) => {
     const { name, email, quantity, price, totalPrice } = order;
-    console.log(order)
     const sentEmailThis = {
         from: process.env.SENDER_EMAIL,
         to: email,
